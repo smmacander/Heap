@@ -3,12 +3,11 @@ using namespace std;
 
 template<class keytype, class valuetype>
 struct BHeapNode{
-    private:
+    public:
+        BHeapNode<keytype, valuetype> *parent, *sibling, *child;
+        int degree;
         keytype key;
         valuetype value;
-        int degree;
-        BHeapNode<keytype, valuetype> *parent, *sibling, *child;
-    public:
         BHeapNode(keytype k, valuetype v, BHeapNode<keytype, valuetype> * p = nullptr){
             key = k;
             value = v;
@@ -16,16 +15,29 @@ struct BHeapNode{
             sibling = child = nullptr;
             degree = 0;
         };
-        void addChild(BHeapNode<keytype, valuetype>* child){
-            cout << "Fix the addChild function in BHeapNode" << endl;
+        void addChild(BHeapNode<keytype, valuetype>* childNode){
+            if(childNode){
+                childNode->sibling = nullptr;
+                if(child){
+                    BHeapNode<keytype, valuetype> *temp = child;
+                    while(temp->sibling) temp = temp->sibling;
+                    temp->sibling = childNode;
+                }
+                else child = childNode;
+                degree++;
+                childNode->parent = this;
+            }
         }
 };
 
 template<class keytype, class valuetype>
 class BHeap{
     public:
+        friend class BHeapNode<keytype, valuetype>;
+        BHeap(); //Default Constructor. The Heap should be empty
         BHeap(keytype k[], valuetype V[], int s); //For this constructor theheap should be built using the arrays K and V containing s items of keytype and valuetype.  The heap should be constructed using repeated insertion
         void insert(keytype k, valuetype v); //Inserts the key k and value v pair into the heap.
+        void printKey(); //Writes the keys stored in the heap, printing the smallest binomial tree first.  When printing a binomial tree, print the size of tree first and then use a modified preorder traversal of the tree.  See the example below.
     private:
         keytype key;
         valuetype value;
@@ -34,13 +46,19 @@ class BHeap{
         BHeapNode<keytype, valuetype> * unionHeap(BHeapNode<keytype, valuetype> *heapA, BHeapNode<keytype, valuetype> *heapB); 
         BHeapNode<keytype, valuetype> * mergeHeap(BHeapNode<keytype, valuetype> *heapA, BHeapNode<keytype, valuetype> *heapB);
         int degree(BHeapNode<keytype, valuetype> *heap);
+        BHeapNode<keytype, valuetype> *head;
 };
+
+template<class keytype, class valuetype>
+BHeap<keytype, valuetype>::BHeap(){
+    head = 0;
+}
 
 template<class keytype, class valuetype>
 BHeap<keytype, valuetype>::BHeap(keytype k[], valuetype V[], int s){
     head = 0;
     for(int i = 0; i < s; i++){
-        insert(keytype k[i], valuetype V[i]);
+        insert(k[i], V[i]);
     }
 };
 
@@ -49,6 +67,11 @@ void BHeap<keytype, valuetype>::insert(keytype k, valuetype v){
     BHeapNode<keytype, valuetype> *p = head? head->parent: nullptr;
     BHeapNode<keytype, valuetype> *singleton = new BHeapNode<keytype, valuetype>(k, v);
     head = unionHeap(singleton, head);
+}
+
+template<class keytype, class valuetype>
+void BHeap<keytype, valuetype>::printKey(){
+    
 }
 
 /////////////////////////////////////////PRIVATE FUNCTIONS/////////////////////////////////////////
@@ -91,7 +114,7 @@ template<class keytype, class valuetype>
 BHeapNode<keytype, valuetype>* BHeap<keytype, valuetype>::mergeHeap(BHeapNode<keytype, valuetype>* heapA, BHeapNode<keytype, valuetype>* heapB){
     BHeapNode<keytype, valuetype> *heapM = nullptr;
     if(heapA || heapB){
-        if(heapA && !heapB) heapM = heapA
+        if(heapA && !heapB) heapM = heapA;
         else if(!heapA && !heapB) heapM = heapB;
         else{
             BHeapNode<keytype, valuetype> *temp = nullptr, *next = nullptr, *prev = nullptr, *cur = nullptr;

@@ -25,5 +25,7 @@ int main(){
 
 	T1.printKey();
 	//Should output 2 3 5 4 8 9 6 10 7
+
+	BHeap<string,int> X(A,B,10), Y;
 	
 }
