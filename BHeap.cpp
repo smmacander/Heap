@@ -25,8 +25,14 @@ class BHeap{
     public:
         BHeap(); //Default Constructor. The Heap should be empty
         BHeap(keytype k[], valuetype V[], int s); //For this constructor theheap should be built using the arrays K and V containing s items of keytype and valuetype.  The heap should be constructed using repeated insertion
+        ~BHeap(); //Destructor for the class
+        BHeap<keytype, valuetype>& operator=(BHeap<keytype, valuetype>& other); //copy assignment operator
+        BHeap(const BHeap<keytype, valuetype>& other); //copy constructor
+        keytype peekKey(); //Returns the minimum key in the heap without modifiying the heap.
+        valuetype peekValue(); //Returns the value associated with the minimum key inthe heap without modifiying the heap.
         keytype extractMin(); //Removes the minimum key in the heap and returns the key.
         void insert(keytype k, valuetype v); //Inserts the key k and value v pair into the heap.
+        void merge(BHeap<keytype, valuetype> &H2); //Merges the H2 into the current heap
         void printKey(); //Writes the keys stored in the heap, printing the smallest binomial tree first.  When printing a binomial tree, print the size of tree first and then use a modified preorder traversal of the tree.  See the example below.
     private:
         list<Node<keytype, valuetype>*> _head;
@@ -37,6 +43,9 @@ class BHeap{
         Node<keytype, valuetype>* mergeBinomialTrees(Node<keytype, valuetype> *b1, Node<keytype, valuetype> *b2);
         void printTree(Node<keytype, valuetype>* h);
         void printHeap(list<Node<keytype, valuetype>*> _heap);
+        Node<keytype, valuetype>* getMin(list<Node<keytype, valuetype>*> _heap);
+        list<Node<keytype, valuetype>*> extractMinHelper(list<Node<keytype, valuetype>*> _heap);
+        list<Node<keytype, valuetype>*> removeMinFromTreeReturnBHeap(Node<keytype, valuetype> *tree);
 };
 
 template<class keytype, class valuetype>
@@ -47,14 +56,55 @@ BHeap<keytype, valuetype>::BHeap(){
 template<class keytype, class valuetype>
 BHeap<keytype, valuetype>::BHeap(keytype k[], valuetype V[], int s){
     for(int i = 0; i < s; i++){
-        cout << "Inserting: " << k[i] << endl;
         insert(k[i], V[i]);
     }
 };
 
 template<class keytype, class valuetype>
+BHeap<keytype, valuetype>::~BHeap(){
+    _head.clear();
+}
+
+template<class keytype, class valuetype>
+BHeap<keytype, valuetype>& BHeap<keytype, valuetype>::operator=(BHeap<keytype, valuetype>& other){
+    if(other != this){
+        _head = other._head;
+    }
+    return this;
+}
+
+template<class keytype, class valuetype>
+BHeap<keytype, valuetype>::BHeap(const BHeap<keytype, valuetype>& other){
+    _head = other._head;
+}
+
+template<class keytype, class valuetype>
+keytype BHeap<keytype, valuetype>::peekKey(){
+    return getMin(_head)->key;
+}
+
+template<class keytype, class valuetype>
+valuetype BHeap<keytype, valuetype>::peekValue(){
+    return getMin(_head)->value;
+}
+
+template<class keytype, class valuetype>
+keytype BHeap<keytype, valuetype>::extractMin(){
+    keytype minKey = getMin(_head)->key;
+    _head = extractMinHelper(_head);
+    _head = adjust(_head);
+    return minKey; 
+}
+
+template<class keytype, class valuetype>
 void BHeap<keytype, valuetype>::insert(keytype k, valuetype v){
     _head = insertHelper(k, v);
+}
+
+template<class keytype, class valuetype>
+void BHeap<keytype, valuetype>::merge(BHeap<keytype, valuetype> &H2){
+    _head = unionBinomialHeap(_head, H2._head);
+    _head = adjust(_head);
 }
 
 template<class keytype, class valuetype>
@@ -71,7 +121,6 @@ list<Node<keytype,valuetype>*> BHeap<keytype, valuetype>::insertHelper(keytype k
 
 template <class keytype, class valuetype>
 list<Node<keytype,valuetype>*> BHeap<keytype, valuetype>::insertATreeInHeap(list<Node<keytype,valuetype>*> _heap, Node<keytype, valuetype> *tree){
-    cout << "inserting a tree " << tree->key << " into the heap" << endl;
     list<Node<keytype,valuetype>*> temp;
     temp.push_back(tree);
     temp = unionBinomialHeap(_heap, temp);
@@ -119,7 +168,7 @@ list<Node<keytype, valuetype>*> BHeap<keytype, valuetype>::adjust(list<Node<keyt
     if(_heap.size() <= 1) return _heap;
     list<Node<keytype, valuetype>*> new_heap;
     typename list<Node<keytype,valuetype>*>::iterator it1, it2, it3;
-    it1 = it1 = it3 = _heap.begin();
+    it1 = it2 = it3 = _heap.begin();
     if(_heap.size() == 2){
         it2 = it1;
         it2++;
@@ -153,21 +202,64 @@ list<Node<keytype, valuetype>*> BHeap<keytype, valuetype>::adjust(list<Node<keyt
 }
 
 template<class keytype, class valuetype>
-void printTree(Node<keytype, valuetype> *h){
+void BHeap<keytype, valuetype>::printTree(Node<keytype, valuetype> *h){
     while(h){
-        cout << h->data << " ";
+        cout << h->key << " ";
         printTree(h->child);
         h = h->sibling;
     }
 }
 
 template<class keytype, class valuetype>
-void printHeap(list<Node<keytype, valuetype>*> _heap){
+void BHeap<keytype, valuetype>::printHeap(list<Node<keytype, valuetype>*> _heap){
     typename list<Node<keytype, valuetype>*>::iterator it;
     it = _heap.begin();
     while(it != _heap.end()){
         cout << "B" << (*it)->degree << endl;
         printTree(*it);
         it++;
+        cout << endl << endl;
     }
+}
+
+template<class keytype, class valuetype>
+Node<keytype, valuetype>* BHeap<keytype, valuetype>::getMin(list<Node<keytype, valuetype>*> _heap){
+    typename list<Node<keytype, valuetype>*>::iterator it = _heap.begin();
+    Node<keytype, valuetype> *temp = *it;
+    while(it != _heap.end()){
+        if((*it)->key < temp->key) temp = *it;
+        it++;
+    }
+    return temp;
+}
+
+template<class keytype, class valuetype>
+list<Node<keytype, valuetype>*> BHeap<keytype, valuetype>::extractMinHelper(list<Node<keytype, valuetype>*> _heap){
+    list<Node<keytype, valuetype>*> new_heap, lo;
+    Node<keytype, valuetype> *temp;
+    temp = getMin(_heap);
+    typename list<Node<keytype, valuetype>*>::iterator it;
+    it = _heap.begin();
+    while(it != _heap.end()){
+        if(*it != temp) new_heap.push_back(*it);
+        it++;
+    }
+    lo = removeMinFromTreeReturnBHeap(temp);
+    new_heap = unionBinomialHeap(new_heap, lo);
+    new_heap = adjust(new_heap);
+    return new_heap;
+}
+
+template<class keytype, class valuetype>
+list<Node<keytype, valuetype>*> BHeap<keytype, valuetype>::removeMinFromTreeReturnBHeap(Node<keytype, valuetype> *tree){
+    list<Node<keytype, valuetype>*> heap;
+    Node<keytype, valuetype> *temp = tree->child;
+    Node<keytype, valuetype> *lo;
+    while(temp){
+        lo = temp;
+        temp = temp->sibling;
+        lo->sibling = NULL;
+        heap.push_front(lo);
+    }
+    return heap;
 }

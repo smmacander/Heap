@@ -9,7 +9,7 @@ class Heap{
         Heap(keytype k[], valuetype  V[], int s); //For this constructor the heap should be built using the arrays K and V containing s items of keytype and valuetype.  The heap should be constructed using the O(n) bottom up heap building method.
         ~Heap(); //Destructor for the class
         Heap<keytype, valuetype>& operator=(Heap<keytype, valuetype>& other); //copy assignment operator
-        Heap(const Heap<keytype, valuetype>& other); //copy constructor
+        Heap(Heap<keytype, valuetype>& other); //copy constructor
         keytype peekKey(); //Returns the minimum key in the heap without modifiying the heap.
         valuetype peekValue(); //Returns the value associated with the minimum key in the heap without modifiying the heap.
         keytype extractMin(); //Removes the minimum key in the heap and returns the key.
@@ -54,16 +54,16 @@ Heap<keytype, valuetype>::~Heap(){
 
 template<class keytype, class valuetype>
 Heap<keytype, valuetype>& Heap<keytype, valuetype>::operator=(Heap<keytype, valuetype>& other){
-    if(other != this){
+    //if(other != *this){
         keyArray = other.keyArray;
         valueArray = other.valueArray;
         heapsize = other.heapsize;
-    }
-    return this;
+    //}
+    return *this;
 }
 
 template<class keytype, class valuetype>
-Heap<keytype, valuetype>::Heap(const Heap<keytype, valuetype>& other){
+Heap<keytype, valuetype>::Heap(Heap<keytype, valuetype>& other){
     keyArray = other.keyArray;
     valueArray = other.valueArray;
     heapsize = other.heapsize;
@@ -81,13 +81,15 @@ valuetype Heap<keytype, valuetype>::peekValue(){
 
 template<class keytype, class valuetype>
 keytype Heap<keytype, valuetype>::extractMin(){
-    keytype min = keyArray[0];
+    keytype minKey = keyArray[0];
     keyArray[0] = keyArray[heapsize-1];
+    keytype minValue = valueArray[0];
+    valueArray[0] = valueArray[heapsize-1];
     heapsize--;
     MinHeapify(keyArray, valueArray, 0);
     keyArray.DelEnd();
     valueArray.DelEnd();
-    return min;
+    return minKey;
 }
 
 template<class keytype, class valuetype>
@@ -129,19 +131,13 @@ int Heap<keytype, valuetype>::Right(int i){
 
 template<class keytype, class valuetype>
 void Heap<keytype, valuetype>::MinHeapify(CDA<keytype> A, CDA<valuetype> B, int i){
-    //cout << "MinHeapifying: " << A[i] << endl;
-    //cout << endl;
     int l = Left(i + 1) - 1;
-    //cout << "Left is: " << l << endl;
     int r = Right(i + 1) - 1;
-    //cout << "Right is: " << r << endl;
     int min;
     if((l <= heapsize - 1) && (A[l] < A[i])) min = l;
     else min = i;
     if((r <= heapsize - 1) && (A[r] < A[min])) min = r;
     if(min != i){
-        //cout << "Swapping Index: " << min << ", " << i << endl;
-        //cout << "Swapping: " << A[min] << ", " << A[i] << endl;
         keytype tempKey = A[i];
         A[i] = A[min];
         A[min] = tempKey;
