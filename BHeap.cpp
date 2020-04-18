@@ -27,7 +27,7 @@ class BHeap{
         BHeap(keytype k[], valuetype V[], int s); //For this constructor theheap should be built using the arrays K and V containing s items of keytype and valuetype.  The heap should be constructed using repeated insertion
         ~BHeap(); //Destructor for the class
         BHeap<keytype, valuetype>& operator=(BHeap<keytype, valuetype>& other); //copy assignment operator
-        BHeap(const BHeap<keytype, valuetype>& other); //copy constructor
+        BHeap(BHeap<keytype, valuetype>& other); //copy constructor
         keytype peekKey(); //Returns the minimum key in the heap without modifiying the heap.
         valuetype peekValue(); //Returns the value associated with the minimum key inthe heap without modifiying the heap.
         keytype extractMin(); //Removes the minimum key in the heap and returns the key.
@@ -67,14 +67,14 @@ BHeap<keytype, valuetype>::~BHeap(){
 
 template<class keytype, class valuetype>
 BHeap<keytype, valuetype>& BHeap<keytype, valuetype>::operator=(BHeap<keytype, valuetype>& other){
-    if(other != this){
+    //if(other != this){
         _head = other._head;
-    }
-    return this;
+    //}
+    return *this;
 }
 
 template<class keytype, class valuetype>
-BHeap<keytype, valuetype>::BHeap(const BHeap<keytype, valuetype>& other){
+BHeap<keytype, valuetype>::BHeap(BHeap<keytype, valuetype>& other){
     _head = other._head;
 }
 
