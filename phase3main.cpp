@@ -358,7 +358,7 @@ int main()
     clock_t start = clock();
     for (int i = 0; i < 10000000; i++)
     {
-        cout << "completed " << i << " tests " << endl;
+        //cout << "completed " << i << " tests " << endl;
         int randomKey = rand() % 100000;
         int randomValue = randomKey;
 
