@@ -83,7 +83,7 @@ template<class keytype, class valuetype>
 keytype Heap<keytype, valuetype>::extractMin(){
     keytype minKey = keyArray[0];
     keyArray[0] = keyArray[heapsize-1];
-    keytype minValue = valueArray[0];
+    valuetype minValue = valueArray[0];
     valueArray[0] = valueArray[heapsize-1];
     heapsize--;
     MinHeapify(keyArray, valueArray, 0);
